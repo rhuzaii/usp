@@ -1,0 +1,50 @@
+Write a program to copy access and modification time of a file to another file using utime function.
+
+#include <stdio.h>
+#include <sys/stat.h>
+#include <utime.h>
+
+int main(int argc, char *argv[]) {
+    struct stat st;
+    struct utimbuf times;
+
+    if (argc < 3) {
+        printf("Usage: %s <source> <destination>\n", argv[0]);
+        return 1;
+    }
+
+    // Get source file info
+    if (stat(argv[1], &st) == -1) {
+        perror("stat failed");
+        return 1;
+    }
+
+    // Copy times
+    times.actime = st.st_atime;
+    times.modtime = st.st_mtime;
+
+    // Apply to destination file
+    if (utime(argv[2], &times) == -1) {
+        perror("utime failed");
+        return 1;
+    }
+
+    printf("Timestamps copied successfully!\n");
+
+    return 0;
+}
+
+nano q5a.c
+gcc q5a.c -o q5a
+./q5a file1.txt file2.txt
+output:
+Timestamps copied successfully!
+verify 
+stat file1.txt
+stat file2.txt
+stat file1.txt
+16777234 92225812 -rw-r--r-- 2 ranaadiba staff 0 12 "May  3 17:44:54 2026" "May  3 17:44:42 2026" "May  3 17:44:52 2026" "May  3 17:44:42 2026" 4096 8 0x40 file1.txt
+stat file2.txt
+16777234 92214668 -rw-r--r-- 1 ranaadiba staff 0 13 "May  3 18:24:43 2026" "May  3 17:44:42 2026" "May  3 18:24:42 2026" "May  3 17:12:40 2026" 4096 8 0x40 file2.txt
+
+
