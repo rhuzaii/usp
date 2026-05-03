@@ -1,0 +1,105 @@
+Consider the last 100 bytes as a region. Write a C program to check whether the region is locked or not. If locked, print PID of process. If not locked, lock the region with exclusive lock, read last 50 bytes and unlock.
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdlib.h>
+
+int main(int argc, char *argv[]) {
+    int fd;
+    struct flock lock;
+    char buffer[51];
+
+    if (argc < 2) {
+        printf("Usage: %s <file>\n", argv[0]);
+        return 1;
+    }
+
+    fd = open(argv[1], O_RDWR);
+    if (fd < 0) {
+        perror("open failed");
+        return 1;
+    }
+
+    // Get file size
+    off_t size = lseek(fd, 0, SEEK_END);
+
+    // Define safe region (last 100 bytes or whole file if smaller)
+    lock.l_whence = SEEK_END;
+
+    if (size < 100) {
+        lock.l_start = 0;
+        lock.l_len = size;
+    } else {
+        lock.l_start = -100;
+        lock.l_len = 100;
+    }
+
+    lock.l_type = F_WRLCK;
+
+    // Check if region is locked
+    if (fcntl(fd, F_GETLK, &lock) == -1) {
+        perror("fcntl GETLK failed");
+        close(fd);
+        return 1;
+    }
+
+    if (lock.l_type != F_UNLCK) {
+        printf("Region is locked by process PID: %d\n", lock.l_pid);
+    } else {
+        printf("Region is not locked. Locking now...\n");
+
+        // Apply exclusive lock
+        lock.l_type = F_WRLCK;
+        if (fcntl(fd, F_SETLK, &lock) == -1) {
+            perror("fcntl SETLK failed");
+            close(fd);
+            return 1;
+        }
+
+        printf("Lock acquired. Holding for 10 seconds...\n");
+        sleep(10);  // 👈 Important for demonstration
+
+        // Read last 50 bytes safely
+        if (size < 50)
+            lseek(fd, 0, SEEK_SET);
+        else
+            lseek(fd, -50, SEEK_END);
+
+        int bytes = read(fd, buffer, 50);
+        if (bytes < 0) {
+            perror("read failed");
+            close(fd);
+            return 1;
+        }
+
+        buffer[bytes] = '\0';
+
+        printf("Last bytes:\n%s\n", buffer);
+
+        // Unlock region
+        lock.l_type = F_UNLCK;
+        if (fcntl(fd, F_SETLK, &lock) == -1) {
+            perror("unlock failed");
+        }
+
+        printf("Lock released.\n");
+    }
+
+    close(fd);
+    return 0;
+}
+
+nano q6b.c
+gcc q6b.c -o q6b
+./q6b file.txt
+
+Region is not locked. Locking now...
+Lock acquired. Holding for 10 seconds...
+Last bytes:
+s is unix shell programming question 6 section a 
+
+Lock released.
+
+./q6b file.txt
+Region is locked by process PID: 32607
