@@ -1,0 +1,81 @@
+Write a C program to perform the following operations
+i) To create a child and parent process with the use of an echoall
+file.
+ii) The Child should execute a process that prints the user defined
+values of environment variables
+iii) The Parent should execute a process that prints default values
+for the environment variables.
+
+nano echoall.c
+#include <stdio.h>
+
+int main(int argc, char *argv[], char *envp[]) {
+
+    printf("---- Arguments ----\n");
+    for (int i = 0; i < argc; i++) {
+        printf("argv[%d] = %s\n", i, argv[i]);
+    }
+
+    printf("\n---- Environment Variables ----\n");
+    for (int i = 0; envp[i] != NULL; i++) {
+        printf("%s\n", envp[i]);
+    }
+
+    return 0;
+}
+
+gcc echoall.c -o echoall
+
+nano q12b.c
+extern char **environ;
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <stdlib.h>
+
+int main() {
+    pid_t pid;
+
+    pid = fork();
+
+    if (pid < 0) {
+        perror("fork failed");
+        return 1;
+    }
+
+    if (pid == 0) {
+        // Child process → user-defined environment
+
+        printf("\n--- Child Process ---\n");
+
+        char *env[] = {
+            "USER=Rana",
+            "CITY=Bangalore",
+            "COURSE=USP",
+            NULL
+        };
+
+        execle("./echoall", "echoall", "Hello", "World", (char *)NULL, env);
+
+        perror("exec failed");
+    } else {
+        // Parent process → default environment
+
+        printf("\n--- Parent Process ---\n");
+
+        wait(NULL);
+
+        execle("./echoall", "echoall", "Default", "Env", (char *)NULL, environ);
+
+        perror("exec failed");
+    }
+
+    return 0;
+}
+
+
+ranaadiba@Ranas-MacBook-Air usp % nano q12b.c
+ranaadiba@Ranas-MacBook-Air usp % nano echoall.c
+ranaadiba@Ranas-MacBook-Air usp % gcc echoall.c -o echoall
+ranaadiba@Ranas-MacBook-Air usp % gcc q12b.c -o q12b
+ranaadiba@Ranas-MacBook-Air usp % ./q12b
