@@ -1,0 +1,50 @@
+Write a C program to create a child process and show how parent and child processes share the text file and justify that both parent and child share the same file offset
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/wait.h>
+
+int main() {
+    int fd;
+    char buffer[10];
+    pid_t pid;
+
+    fd = open("file.txt", O_RDONLY);
+    if (fd < 0) {
+        perror("File open failed");
+        return 1;
+    }
+
+    pid = fork();
+
+    if (pid == 0) {
+        // Child Process
+        sleep(1);  // ensure parent runs first
+
+        read(fd, buffer, 3);
+        buffer[3] = '\0';
+
+        printf("Child reads: %s\n", buffer);
+    } else {
+        // Parent Process
+        read(fd, buffer, 3);
+        buffer[3] = '\0';
+
+        printf("Parent reads: %s\n", buffer);
+
+        wait(NULL);
+    }
+
+    close(fd);
+    return 0;
+}
+
+nano q1b.c
+gcc q1b.c -o q1b
+vi file.txt (ABCDEF)
+./q1b
+
+output
+Parent reads: ABC
+Child reads: DEF
