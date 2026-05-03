@@ -1,0 +1,49 @@
+Write a C program to illustrate the effect of setjmp and longjmp functions on register and volatile variables.
+
+#include <stdio.h>
+#include <setjmp.h>
+
+jmp_buf buf;
+
+void func() {
+    printf("\nInside func()\n");
+    longjmp(buf, 1);
+}
+
+int main() {
+    int a = 10;
+    register int b = 20;
+    volatile int c = 30;
+
+    if (setjmp(buf) == 0) {
+        // First time
+        printf("Before longjmp:\n");
+        printf("a = %d, b = %d, c = %d\n", a, b, c);
+
+        // Modify values
+        a = 100;
+        b = 200;
+        c = 300;
+
+        func();
+    } else {
+        // After longjmp
+        printf("\nAfter longjmp:\n");
+        printf("a = %d, b = %d, c = %d\n", a, b, c);
+    }
+
+    return 0;
+}
+
+nano q7a.c
+gcc q7a.c -o q7a
+./q7a
+
+Before longjmp:
+a = 10, b = 20, c = 30
+
+Inside func()
+
+After longjmp:
+a = 100, b = 200, c = 300
+
