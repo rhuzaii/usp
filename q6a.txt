@@ -1,0 +1,81 @@
+
+Write a program to read n characters from a file and append them back to the same file using dup2 function.
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdlib.h>
+
+int main(int argc, char *argv[]) {
+    int fd, n, bytes;
+    char buffer[1024];
+
+    // Check arguments
+    if (argc < 3) {
+        printf("Usage: %s <file> <n>\n", argv[0]);
+        return 1;
+    }
+
+    n = atoi(argv[2]);
+
+    // Open file in read-write mode
+    fd = open(argv[1], O_RDWR);
+    if (fd < 0) {
+        perror("open failed");
+        return 1;
+    }
+
+    // Read n characters
+    bytes = read(fd, buffer, n);
+    if (bytes < 0) {
+        perror("read failed");
+        close(fd);
+        return 1;
+    }
+
+    // Move to end of file
+    if (lseek(fd, 0, SEEK_END) < 0) {
+        perror("lseek failed");
+        close(fd);
+        return 1;
+    }
+
+    // Save original stdout
+    int stdout_copy = dup(1);
+
+    // Redirect stdout to file
+    if (dup2(fd, 1) < 0) {
+        perror("dup2 failed");
+        close(fd);
+        return 1;
+    }
+
+    // Append content
+    write(1, buffer, bytes);
+
+    // Add newline for clean output (fix for % issue)
+    write(1, "\n", 1);
+
+    // Restore stdout
+    dup2(stdout_copy, 1);
+
+    printf("Appended successfully\n");
+
+    close(fd);
+    close(stdout_copy);
+
+    return 0;
+}
+
+truncate -s 0 filename
+
+
+ nano q6a.c
+gcc q6a.c -o q6a
+ ./q6a file.txt 3   
+Appended successfully
+cat file.txt
+ABCDEFG
+ABC
+
+
