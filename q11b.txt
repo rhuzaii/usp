@@ -1,0 +1,80 @@
+Write a program to perform the following operations
+i) To create a child process
+ii) The child process should execute a separate program (using exec
+function) that calculates the addition of two numbers by passing two
+integer values.
+iii) The parent process should wait for a child to complete
+
+nano add.c
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, char *argv[]) {
+
+    if (argc != 3) {
+        printf("Usage: %s <num1> <num2>\n", argv[0]);
+        return 1;
+    }
+
+    int a = atoi(argv[1]);
+    int b = atoi(argv[2]);
+
+    int sum = a + b;
+
+    printf("Sum = %d\n", sum);
+
+    return 0;
+}
+
+nano q11b.c
+
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <stdlib.h>
+
+int main() {
+    pid_t pid;
+
+    pid = fork();
+
+    if (pid < 0) {
+        perror("fork failed");
+        return 1;
+    }
+
+    if (pid == 0) {
+        // Child process
+        printf("Child process (PID: %d)\n", getpid());
+
+        execl("./add", "add", "10", "20", (char *)NULL);
+
+        // If exec fails
+        perror("exec failed");
+        exit(1);
+    } else {
+        // Parent process
+        printf("Parent process (PID: %d)\n", getpid());
+
+        wait(NULL);
+
+        printf("Child process completed\n");
+    }
+
+    return 0;
+}
+
+gcc q11b.c -o q11b
+
+
+ranaadiba@Ranas-MacBook-Air usp % nano add.c
+ranaadiba@Ranas-MacBook-Air usp % gcc add.c -o add
+ranaadiba@Ranas-MacBook-Air usp % nano q11b.c
+ranaadiba@Ranas-MacBook-Air usp % ./q11b
+zsh: no such file or directory: ./q11b
+ranaadiba@Ranas-MacBook-Air usp % gcc q11b.c -o q11b
+ranaadiba@Ranas-MacBook-Air usp % ./q11b            
+Parent process (PID: 17506)
+Child process (PID: 17591)
+Sum = 30
+Child process completed
