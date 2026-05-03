@@ -1,0 +1,40 @@
+Write a C program to display the file content in reverse order using lseek system call.
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main() {
+    int fd;
+    char ch;
+    off_t pos;
+
+    fd = open("file.txt", O_RDONLY);
+    if (fd < 0) {
+        perror("File open failed");
+        return 1;
+    }
+
+    // Move to end
+    pos = lseek(fd, 0, SEEK_END);
+
+    while (pos > 0) {
+        lseek(fd, -1, SEEK_CUR);   // move back
+        read(fd, &ch, 1);          // read char
+        write(1, &ch, 1);          // print
+
+        pos--;
+
+        lseek(fd, -1, SEEK_CUR);   // move back again
+    }
+
+    close(fd);
+    return 0;
+}
+
+nano q1a.c
+gcc q1a.c -o q1a 
+vi file.txt ( Hello World )
+./q1a
+output: 
+dlroW olleH% 
