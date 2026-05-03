@@ -1,0 +1,64 @@
+Write a C program
+i. To read the first 20 characters from a file
+ii. seek to 10th byte from the beginning and display 20 characters
+from there
+iii. seek 10 bytes ahead from the current file offset and display 20
+characters
+iv. Display the file size
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdlib.h>
+
+int main(int argc, char *argv[]) {
+    int fd;
+    char buffer[21];
+    int bytes;
+    off_t size;
+
+    if (argc < 2) {
+        printf("Usage: %s <file>\n", argv[0]);
+        return 1;
+    }
+
+    fd = open(argv[1], O_RDONLY);
+    if (fd < 0) {
+        perror("open failed");
+        return 1;
+    }
+
+    // Step 1: Read first 20 characters
+    bytes = read(fd, buffer, 20);
+    buffer[bytes] = '\0';
+    printf("First 20 chars: %s\n", buffer);
+
+    // Step 2: Seek to 10th byte from beginning
+    lseek(fd, 10, SEEK_SET);
+    bytes = read(fd, buffer, 20);
+    buffer[bytes] = '\0';
+    printf("From 10th byte: %s\n", buffer);
+
+    // Step 3: Seek 10 bytes ahead from current position
+    lseek(fd, 10, SEEK_CUR);
+    bytes = read(fd, buffer, 20);
+    buffer[bytes] = '\0';
+    printf("10 bytes ahead: %s\n", buffer);
+
+    // Step 4: Get file size
+    size = lseek(fd, 0, SEEK_END);
+    printf("File size: %lld bytes\n", (long long)size);
+
+    close(fd);
+    return 0;
+}
+
+
+
+ranaadiba@Ranas-MacBook-Air usp % nano q9b.c
+ranaadiba@Ranas-MacBook-Air usp % gcc q9b.c -o q9b
+ranaadiba@Ranas-MacBook-Air usp % ./q9b file.txt
+First 20 chars: hey this is a test f
+From 10th byte: s a test file i am c
+10 bytes ahead: ck and reading its c
+File size: 121 byte
