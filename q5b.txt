@@ -1,0 +1,44 @@
+Write a C program using sigaction system call which calls a signal handler on SIGINT signal and then reset the default action of the SIGINT signal
+
+#include <stdio.h>
+#include <signal.h>
+#include <unistd.h>
+
+void handler(int sig) {
+    printf("\nCaught SIGINT (Ctrl+C)\n");
+
+    // Reset to default behavior
+    signal(SIGINT, SIG_DFL);
+}
+
+int main() {
+    struct sigaction sa;
+
+    // Assign handler
+    sa.sa_handler = handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+
+    // Register signal
+    sigaction(SIGINT, &sa, NULL);
+
+    while (1) {
+        printf("Running... Press Ctrl+C\n");
+        sleep(2);
+    }
+
+    return 0;
+}
+nano q5b.c
+gcc q5b.c -o q5b
+./q5b
+
+Running... Press Ctrl+C
+Running... Press Ctrl+C
+Running... Press Ctrl+C
+^C
+Caught SIGINT (Ctrl+C)
+Running... Press Ctrl+C
+Running... Press Ctrl+C
+^C
+
