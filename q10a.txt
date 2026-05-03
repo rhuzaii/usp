@@ -1,0 +1,69 @@
+Write a C program such that it initializes itself as a Daemon Process.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h> 
+
+int main() {
+    pid_t pid;
+
+    // Step 1: fork
+    pid = fork();
+
+    if (pid < 0) {
+        perror("fork failed");
+        exit(1);
+    }
+
+    // Step 2: parent exits
+    if (pid > 0) {
+        exit(0);
+    }
+
+    // Step 3: create new session
+    if (setsid() < 0) {
+        perror("setsid failed");
+        exit(1);
+    }
+
+    // Step 4: change directory
+    chdir("/");
+
+    // Step 5: reset file permissions
+    umask(0);
+
+    // Step 6: close file descriptors
+    close(0);
+    close(1);
+    close(2);
+
+    // Daemon work (infinite loop)
+    while (1) {
+        sleep(5);
+    }
+
+    return 0;
+}
+
+
+Style	Syntax
+BSD	ps aux
+POSIX/System V	ps -ef
+
+ranaadiba@Ranas-MacBook-Air usp % nano q10a.c       
+ranaadiba@Ranas-MacBook-Air usp % gcc q10a.c -o q10a
+ranaadiba@Ranas-MacBook-Air usp % ./q10a
+ranaadiba@Ranas-MacBook-Air usp % 
+
+ranaadiba@Ranas-MacBook-Air usp % ps aux | grep q10a  
+ranaadiba        97227   0.0  0.0 435300336   1312 s009  S+    8:03PM   0:00.01 grep q10a
+ranaadiba        96063   0.0  0.0 435295552    400   ??  Ss    8:02PM   0:00.00 ./q10a
+ranaadiba@Ranas-MacBook-Air usp % kill 96063
+ranaadiba@Ranas-MacBook-Air usp % ps aux | grep q10a
+ranaadiba        98501   0.0  0.0 435299456   1312 s009  S+    8:04PM   0:00.01 grep q10a
+ranaadiba@Ranas-MacBook-Air usp % 
+
+
+
