@@ -1,0 +1,86 @@
+b) Write a C program to perform the following operations
+i. To create a child process
+ii. The child process should execute a program (using exec( )) to
+show the use of the access function
+iii. The parent process should wait for the child process to exit
+iv. Also print the necessary process IDs
+
+
+nano check_access.c
+
+#include <stdio.h>
+#include <unistd.h>
+
+int main(int argc, char *argv[]) {
+
+    if (argc < 2) {
+        printf("Usage: %s <file>\n", argv[0]);
+        return 1;
+    }
+
+    if (access(argv[1], F_OK) == 0)
+        printf("File exists\n");
+    else
+        printf("File does not exist\n");
+
+    if (access(argv[1], R_OK) == 0)
+        printf("Readable\n");
+
+    if (access(argv[1], W_OK) == 0)
+        printf("Writable\n");
+
+    if (access(argv[1], X_OK) == 0)
+        printf("Executable\n");
+
+    return 0;
+}
+
+gcc check_access.c -o check_access
+
+nano q8b.c
+
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/wait.h>
+
+int main() {
+    pid_t pid;
+
+    pid = fork();
+
+    if (pid < 0) {
+        perror("fork failed");
+        return 1;
+    }
+
+    if (pid == 0) {
+        // Child process
+        printf("Child PID: %d\n", getpid());
+
+        execl("./check_access", "check_access", "file.txt", (char *)NULL);
+
+        // Only runs if exec fails
+        perror("exec failed");
+    } else {
+        // Parent process
+        printf("Parent PID: %d\n", getpid());
+
+        wait(NULL);
+
+        printf("Child process finished\n");
+    }
+
+    return 0;
+}
+
+gcc q8b.c -o q8b
+./q8b
+
+OUTPUT:
+
+Child PID: 75393
+Parent PID: 75391
+File exists
+Readable
+Writable
+Child process finished
