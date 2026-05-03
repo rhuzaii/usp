@@ -1,0 +1,53 @@
+Write a program to differentiate between dup and dup2 functions 
+
+
+Feature	dup()	dup2()
+Control over FD	❌ No	✅ Yes
+Chooses FD	lowest free	specified
+Closes target FD	❌	✅ Yes
+Common use	simple duplication	redirection
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main() {
+    int fd, newfd;
+
+    // Open file
+    fd = open("file.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+
+    if (fd < 0) {
+        perror("open failed");
+        return 1;
+    }
+
+    printf("Original FD: %d\n", fd);
+
+    // Using dup()
+    newfd = dup(fd);
+    printf("dup() created FD: %d\n", newfd);
+
+    write(newfd, "Written using dup()\n", 20);
+
+    // Using dup2()
+    dup2(fd, 1);  // redirect stdout to file
+
+    printf("This goes to file using dup2()\n");
+
+    close(fd);
+    close(newfd);
+
+    return 0;
+}
+
+
+ranaadiba@Ranas-MacBook-Air usp % nano q11a.c
+ranaadiba@Ranas-MacBook-Air usp % gcc q11a.c -o q11a
+ranaadiba@Ranas-MacBook-Air usp % ./q11a
+Original FD: 3
+dup() created FD: 4
+ranaadiba@Ranas-MacBook-Air usp % cat file.txt
+Written using dup()
+This goes to file using dup2()
+
