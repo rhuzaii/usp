@@ -1,0 +1,56 @@
+Write a C program to demonstrate the creation of soft links and hard links
+
+#include <stdio.h>
+#include <unistd.h>
+
+int main() {
+
+    // Create hard link
+    if (link("file1.txt", "hardlink.txt") == -1) {
+        perror("Hard link failed");
+    } else {
+        printf("Hard link created successfully\n");
+    }
+
+    // Create soft link
+    if (symlink("file1.txt", "softlink.txt") == -1) {
+        perror("Soft link failed");
+    } else {
+        printf("Soft link created successfully\n");
+    }
+
+    return 0;
+}
+
+
+nano q4a.c
+gcc q4a.c -o q4a
+vi file1.txt (hello world)
+./q4a
+output: 
+Hard link created successfully
+Soft link created successfully
+
+ls -li
+total 592
+92203423 -rw-r--r--@ 1 ranaadiba  staff     13  3 May 16:40 file.txt
+92225812 -rw-r--r--  2 ranaadiba  staff     12  3 May 17:44 file1.txt
+92214668 -rw-r--r--  1 ranaadiba  staff     13  3 May 17:12 file2.txt
+92214695 -rw-r--r--  1 ranaadiba  staff      0  3 May 17:12 file3.txt
+92225812 -rw-r--r--  2 ranaadiba  staff     12  3 May 17:44 hardlink.txt
+92201750 -rwxr-xr-x@ 1 ranaadiba  staff  33632  3 May 16:25 q1a
+92201587 -rw-r--r--@ 1 ranaadiba  staff    554  3 May 16:24 q1a.c
+92202854 -rwxr-xr-x  1 ranaadiba  staff  33840  3 May 16:37 q1b
+92202818 -rw-r--r--  1 ranaadiba  staff    672  3 May 16:36 q1b.c
+92204384 -rwxr-xr-x  1 ranaadiba  staff  33552  3 May 16:50 q2a
+92204238 -rw-r--r--  1 ranaadiba  staff    688  3 May 16:50 q2a.c
+92213844 -rwxr-xr-x  1 ranaadiba  staff  33616  3 May 17:04 q2b
+92213681 -rw-r--r--  1 ranaadiba  staff    568  3 May 17:04 q2b.c
+92214528 -rwxr-xr-x  1 ranaadiba  staff  33920  3 May 17:12 q3a
+92214499 -rw-r--r--  1 ranaadiba  staff   1141  3 May 17:11 q3a.c
+92217303 -rwxr-xr-x@ 1 ranaadiba  staff  34032  3 May 17:22 q3b
+92217204 -rw-r--r--@ 1 ranaadiba  staff   1824  3 May 17:22 q3b.c
+92225711 -rwxr-xr-x  1 ranaadiba  staff  33552  3 May 17:44 q4a
+92225662 -rw-r--r--  1 ranaadiba  staff    439  3 May 17:44 q4a.c
+92225892 lrwxr-xr-x  1 ranaadiba  staff      9  3 May 17:44 softlink.txt -> file1.txt
+92214616 drwxr-xr-x  3 ranaadiba  staff     96  3 May 17:14 testdir
